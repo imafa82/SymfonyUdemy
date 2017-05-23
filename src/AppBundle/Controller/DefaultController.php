@@ -24,7 +24,7 @@ class DefaultController extends Controller
     }
     
     /**
-     * @Route("/{nome}", name="test")
+     * @Route("/nome/{nome}", name="test")
      */
     public function testAction(Request $request, $nome)
     {
@@ -44,6 +44,55 @@ class DefaultController extends Controller
         // replace this example code with whatever you need
         return $this->render('default/nome.html.twig', [
             'nome' => $nome
+        ]);
+    }
+    
+    /**
+     * @Route("/nominativo", name="test2")
+     * Method("POST")
+     */
+    
+    public function test2Action(Request $request)
+    {
+        echo $request->request->getAlpha('nome');
+        echo "<br>";
+        echo $request->request->getDigits('nome');
+        $nome = $request->request->get('nome');
+        $file =  $request->files->get('file')?:null;
+        if($file)
+        var_dump($file);
+        
+        return $this->render('default/nome.html.twig', [
+            'nome' => $nome
+        ]);
+    }
+    /**
+     * @Route("/test/{nome}", name="test3")
+     */
+    public function test3Action(Request $request, $nome)
+    {
+        //Verifica se l'url ha o no cognome come variabile
+        if($request->query->has('cognome')){
+            echo "cognome c'è";
+            echo $request->get('cognome');
+            echo $request->query->get('cognome');
+        } else {
+            echo "mi dispiace ma cognome non c'è";
+        }
+        
+        $request->query->add(array('citta' => 'Torino'));
+        if($request->query->has('citta')){
+            echo $request->query->get('citta');
+        }
+        $request->query->remove('citta');
+        $request->query->replace(array('cognome' => 'Salernino'));
+        echo "<br>";
+        var_dump($request->query);
+        echo "<br>";
+        //var_dump($request);
+        echo $request->headers->get('user-agent');
+        return $this->render('default/request.html.twig', [
+            'nome' => $nome, 'res' => $request
         ]);
     }
 }
