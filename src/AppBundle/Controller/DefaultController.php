@@ -7,6 +7,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Cookie;
+use AppBundle\Entity\User;
+use AppBundle\Form\UserType;
 
 class DefaultController extends Controller
 {
@@ -122,5 +124,18 @@ class DefaultController extends Controller
         $response = new Response();
         $response->headers->setCookie($cookie);
         return $this->render('default/response.html.twig', [] , $response);
+    }
+     /**
+     * @Route("/users/new", name="users")
+     */
+    public function createUserAction(Request $request)
+    {
+        $user = new User();
+        $form = $this->createForm(UserType::class, $user);
+        $form->handleRequest($request);
+        if($form->isValid() && $form->isSubmitted()){
+            return $this->redirectToRoute('homepage');
+        }
+        return $this->render('default/users.html.twig', array('form' => $form->createView()));
     }
 }
