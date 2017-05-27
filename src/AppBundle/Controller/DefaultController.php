@@ -7,6 +7,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Cookie;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use AppBundle\Entity\User;
 use AppBundle\Form\UserType;
 
@@ -134,6 +135,16 @@ class DefaultController extends Controller
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
         if($form->isValid() && $form->isSubmitted()){
+            $em = $this->getDoctrine()->getManager();
+            /**
+             * @var $file UploadedFile
+             */
+            $file = $user->getAvatar();
+            $fileName = md5(uniqid()).'.'.$file->guessExtension();
+            $file->move($this->getParameter('upload_dir'), $fileName);
+            $user->setAvatar($fileName);
+            $em->persist($user);
+            $em->flush();
             return $this->redirectToRoute('homepage');
         }
         return $this->render('default/users.html.twig', array('form' => $form->createView()));
