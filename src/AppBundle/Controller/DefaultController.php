@@ -127,7 +127,7 @@ class DefaultController extends Controller
         return $this->render('default/response.html.twig', [] , $response);
     }
      /**
-     * @Route("/users/new", name="users")
+     * @Route("/users/new", name="user_new")
      */
     public function createUserAction(Request $request)
     {
@@ -136,12 +136,8 @@ class DefaultController extends Controller
         $form->handleRequest($request);
         if($form->isValid() && $form->isSubmitted()){
             $em = $this->getDoctrine()->getManager();
-            /**
-             * @var $file UploadedFile
-             */
-            $file = $user->getAvatar();
-            $fileName = md5(uniqid()).'.'.$file->guessExtension();
-            $file->move($this->getParameter('upload_dir'), $fileName);
+            $fileName = $this->get('app.avatar_upload')->upload($user->getAvatar());
+            $thumb = $this->get('app.avatar_resize')->resizeImage($fileName);
             $user->setAvatar($fileName);
             $em->persist($user);
             $em->flush();
