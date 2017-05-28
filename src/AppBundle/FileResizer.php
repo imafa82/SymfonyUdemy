@@ -3,13 +3,16 @@
 
 
 namespace AppBundle;
-
+use Symfony\Component\Filesystem\Filesystem;
 class FileResizer {
     private $fileDir;
     private $sizes;
-    public function __construct($fileDir, $sizes) {
+    private $fs;
+    
+    public function __construct($fileDir, $sizes, Filesystem $fs) {
         $this->fileDir = $fileDir;
         $this->sizes = $sizes;
+        $this->fs = $fs;
     }   
     
     public function resizeImage($fileName) {
@@ -27,9 +30,10 @@ class FileResizer {
                     );
             if($scale >= 1){
                 if($fullPath !== $newfilePath){
-                    return copy($fullPath, $newfilePath);
+                    return $this->fs->copy($fullPath, $newfilePath);
+                    //return copy($fullPath, $newfilePath);
                 }
-                return;
+                continue;
             }
             
             //scala le immagini mantenendo le proporzioni

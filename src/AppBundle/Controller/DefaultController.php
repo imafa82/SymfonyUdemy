@@ -137,7 +137,7 @@ class DefaultController extends Controller
         if($form->isValid() && $form->isSubmitted()){
             $em = $this->getDoctrine()->getManager();
             $fileName = $this->get('app.avatar_upload')->upload($user->getAvatar());
-            $thumb = $this->get('app.avatar_resize')->resizeImage($fileName);
+            //$thumb = $this->get('app.avatar_resize')->resizeImage($fileName);
             $user->setAvatar($fileName);
             $em->persist($user);
             $em->flush();
