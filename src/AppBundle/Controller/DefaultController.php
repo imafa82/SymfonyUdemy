@@ -7,6 +7,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Cookie;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 class DefaultController extends Controller
 {
@@ -117,10 +121,82 @@ class DefaultController extends Controller
      */
     public function cookiesAction(Request $request)
     {
-        //Istanzio l'oggetto cookie
-        $cookie = new Cookie('nomeCookie', 'ValoreCookie',(time()*3600*27*7));
         $response = new Response();
-        $response->headers->setCookie($cookie);
-        return $this->render('default/response.html.twig', [] , $response);
+        // Per leggere il cookie
+        if($request->cookies->has('nomeCookie')){
+            $cookie = $request->cookies->get('nomeCookie');
+            echo $cookie;
+       
+        }else {
+            $cookie = new Cookie('nomeCookie', 'ValoreCookie',(time() + (3600*27*7)));
+            $response->headers->setCookie($cookie);
+        }
+        
+        
+        
+        $response->setContent($this->renderView('default/cookie.html.twig'));
+        return $response;
+     //   return $this->render('default/response.html.twig', [] , $response);
+    }
+    
+     
+    /**
+     * @Route("/deletecookies", name="deletecookies")
+     */
+    public function deleteCookiesAction(Request $request)
+    {
+        $response = new Response();
+        
+        //Verifichiamo se c'è il cookie
+        if($request->cookies->has('nomeCookie')){
+            $response->headers->clearCookie('nomeCookie');
+            echo "Cookie cancellato";
+        }else {
+            echo "Non vi è alcun Cookie settato con nomeCookie";
+        }
+        
+        $response->setContent($this->renderView('default/cookie.html.twig'));
+        return $response;
+     //   return $this->render('default/response.html.twig', [] , $response);
+    }
+    
+    /**
+     * @Route("/file", name="file")
+     */
+    public function fileAction(Request $request)
+    {
+        $file = $this->get('kernel')->getRootDir().'/../web/upload/MassimilianoSalerno.pdf';
+        $response = new BinaryFileResponse($file);
+        $disposition = $response->headers->makeDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, 'curriculum.pdf');
+        // Cancella il file che viene scaricato
+        $response->deleteFileAfterSend(true);
+        $response->headers->set('Content-Disposition', $disposition);
+        return $response;
+     //   return $this->render('default/response.html.twig', [] , $response);
+    }
+    
+    /**
+     * @Route("/redirect", name="redirect")
+     */
+    public function redirectAction(Request $request)
+    {
+        $response= new RedirectResponse('http://massimilianosalerno.it');
+        return $response;
+     //   return $this->render('default/response.html.twig', [] , $response);
+    }
+    
+    /**
+     * @Route("/json", name="json")
+     */
+    public function jsonAction(Request $request)
+    {
+        $data = json_encode(['username'=> 'Peppino']);
+        // Se il dato non è un json
+        //$response= new JsonResponse(['username'=> 'massy']);
+        // Se il dato è già un json
+        $response= new JsonResponse($data,200,array(),true);
+        echo $response->headers->get('content-type');
+        return $response;
+     //   return $this->render('default/response.html.twig', [] , $response);
     }
 }
