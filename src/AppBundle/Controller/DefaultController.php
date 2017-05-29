@@ -11,6 +11,9 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use AppBundle\Entity\User;
+use AppBundle\Form\UserType;
 
 class DefaultController extends Controller
 {
@@ -198,5 +201,24 @@ class DefaultController extends Controller
         echo $response->headers->get('content-type');
         return $response;
      //   return $this->render('default/response.html.twig', [] , $response);
+    }
+     /**
+     * @Route("/users/new", name="user_new")
+     */
+    public function createUserAction(Request $request)
+    {
+        $user = new User();
+        $form = $this->createForm(UserType::class, $user);
+        $form->handleRequest($request);
+        if($form->isValid() && $form->isSubmitted()){
+            $em = $this->getDoctrine()->getManager();
+            $fileName = $this->get('app.avatar_upload')->upload($user->getAvatar());
+            //$thumb = $this->get('app.avatar_resize')->resizeImage($fileName);
+            $user->setAvatar($fileName);
+            $em->persist($user);
+            $em->flush();
+            return $this->redirectToRoute('homepage');
+        }
+        return $this->render('default/users.html.twig', array('form' => $form->createView()));
     }
 }

@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Nuovo Utente</h1>
+    {{ form_start(form, {'attr':{'novalidate':'novalidate'}}) }}
+    <div style="background-color: green">
+        {{ form_label(form.name) }}
+        {{ form_errors(form.name) }}
+        {{ form_widget(form.name) }}
+    </div>
+    {{ form_row(form.avatar) }}
+    <button type="submit">Crea</button>
+    {{ form_end(form) }}
+{% endblock %}
